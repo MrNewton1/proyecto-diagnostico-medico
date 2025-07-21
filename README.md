@@ -1,29 +1,26 @@
 # Sistema Experto de Diagnóstico Médico
 
-**Proyecto académico**: Agente inteligente de diagnóstico de Infecciones Respiratorias Agudas
-**Autor**: Isaac
+**Proyecto académico**: Agente inteligente de diagnóstico de enfermedades comunes  
+**Autores**: Alan Isaac Pérez Hernández 336008878, Molina García Luis Alberto 17715680, Ethan David Ríos Beltrán 21257899.
 **Fecha**: Julio 2025
 
 ---
 
 ## Descripción
-
-Este sistema experto combina una **base de conocimientos en Prolog**, un **controlador en Python** y una **interfaz web** basada en Flask para diagnosticar enfermedades respiratorias agudas.
-El prototipo permite al usuario seleccionar síntomas comunes y retorna posibles diagnósticos con un nivel de confianza calculado según la proporción de síntomas coincidentes.
+Este sistema experto combina una **base de conocimientos en Prolog**, un **controlador en Python** y una **interfaz de escritorio** ligera con Tkinter para diagnosticar una amplia gama de enfermedades comunes.  
+Mediante búsqueda y selección de síntomas generales, el usuario recibe posibles diagnósticos con un nivel de confianza basado en la proporción de síntomas coincidentes.
 
 ---
 
 ## Estructura del Proyecto
-
 ```
 proyecto_diagnostico_medico/
 ├── kb/
-│   └── kb.pl               # Base de conocimientos Prolog
+│   └── kb.pl               # Base de conocimientos Prolog (enfermedades y síntomas)
 ├── src/
-│   ├── app.py              # Aplicación web Flask
-│   ├── controller.py       # Controlador Python intermedio
-│   └── templates/
-│       └── index.html      # Plantilla Jinja2 con Bootstrap
+│   ├── controller.py       # Lógica de interacción Python ↔ Prolog
+│   └── desktop/
+│       └── main.py         # Interfaz de escritorio Tkinter (tema oscuro con búsqueda)
 ├── tests/
 │   └── test_controller.py  # Pruebas unitarias con pytest
 ├── requirements.txt        # Dependencias Python
@@ -33,35 +30,29 @@ proyecto_diagnostico_medico/
 ---
 
 ## Requisitos Previos
-
-* **Python 3.10+**
-* **SWI‑Prolog** (asegúrate de que `swipl` esté en el PATH)
-* **pip** para gestionar paquetes Python
+- **Python 3.10+**  
+- **SWI-Prolog** (verificar que `swipl` esté en el PATH)  
+- **pip** y **virtualenv** para gestionar entornos Python
 
 ---
 
 ## Instalación y Configuración
-
 1. Clonar el repositorio:
-
    ```bash
    git clone https://github.com/tu_usuario/proyecto_diagnostico_medico.git
    cd proyecto_diagnostico_medico
    ```
 2. Crear y activar un entorno virtual:
-
    ```bash
    python3 -m venv .venv
    source .venv/bin/activate   # macOS/Linux
    .venv\Scripts\activate    # Windows
    ```
 3. Instalar dependencias:
-
    ```bash
    pip install -r requirements.txt
    ```
-4. Verificar instalación de SWI‑Prolog:
-
+4. Verificar instalación de SWI-Prolog:
    ```bash
    swipl --version
    ```
@@ -71,76 +62,65 @@ proyecto_diagnostico_medico/
 ## Uso
 
 ### 1. Línea de Comandos (CLI)
-
-Proporciona una forma rápida de probar el controlador:
-
+Probar el controlador directamente:
 ```bash
-python3 src/controller.py fiebre_alta tos_seca --umbral 0.2
+python3 src/controller.py sintoma1 sintoma2 --umbral 0.2
 ```
-
-Salida esperada (JSON):
-
+**Ejemplo**:
+```bash
+python3 src/controller.py fiebre cefalea polidipsia
+```
+Salida (JSON):
 ```json
 [
-  {"enfermedad": "resfriado_comun", "confianza": 0.4}
+  {"enfermedad": "diabetes_mellitus", "confianza": 0.4},
+  {"enfermedad": "gripe", "confianza": 0.2}
 ]
 ```
 
-### 2. Interfaz Web
-
-1. Establecer la variable de entorno (opcional):
-
+### 2. Interfaz de Escritorio (Tkinter)
+1. Activar entorno virtual:
    ```bash
-   export FLASK_ENV=development
+   source .venv/bin/activate
    ```
-2. Ejecutar el servidor Flask:
-
+2. Ejecutar la GUI:
    ```bash
-   flask run
+   python3 src/desktop/main.py
    ```
-3. Abrir en el navegador: `http://localhost:5000`
-4. Seleccionar síntomas y pulsar **Diagnosticar**.
+3. Buscar o filtrar síntomas en la barra de búsqueda, seleccionar los deseados y pulsar **Diagnosticar**.
 
 ---
 
 ## Pruebas Unitarias
-
-Se utilizan **pytest** para validar la lógica del controlador.
-
+Se emplea **pytest** para garantizar la lógica del controlador:
 ```bash
 pytest -q
-```
-
-Ejemplo de prueba (`tests/test_controller.py`):
-
+``` 
+Ejemplo en `tests/test_controller.py`:
 ```python
 from src.controller import DiagnosticController
 
-def test_resfriado():
+def test_diabetes():
     ctrl = DiagnosticController()
-    ctrl.set_symptoms(['congestion_nasal','goteo_nasal'])
-    resultados = dict(ctrl.get_diagnostics(threshold=0.2))
-    assert 'resfriado_comun' in resultados
-    assert resultados['resfriado_comun'] == 0.4
+    ctrl.set_symptoms(['poliuria','polidipsia','polifagia'])
+    res = dict(ctrl.get_diagnostics(threshold=0.3))
+    assert 'diabetes_mellitus' in res
+    assert res['diabetes_mellitus'] == pytest.approx(0.6)
 ```
 
 ---
 
 ## Arquitectura
-
-1. **kb/kb.pl**: Hechos `sintoma(Enf,Sintoma)` y reglas `diagnostico/2`, `diagnostico_confianza/3`.
-2. **src/controller.py**: Carga la KB en Prolog, maneja síntomas dinámicos y extrae diagnósticos.
-3. **src/app.py**: Servidor Flask que renderiza la plantilla y maneja la interacción de usuario.
-4. **src/templates/index.html**: Interfaz responsiva con Bootstrap.
+1. **kb/kb.pl**: Hechos `sintoma(Enf, Sintoma)` para múltiples enfermedades y reglas de diagnóstico.
+2. **src/controller.py**: Capa intermedia Python ↔ Prolog.
+3. **src/desktop/main.py**: Interfaz de escritorio con tema oscuro, búsqueda de síntomas y resultados.
 
 ---
 
 ## Contribuciones
-
-Las contribuciones académicas son bienvenidas. Para sugerencias o mejoras, crea un *issue* o envía un *pull request*.
+Las propuestas académicas y mejoras son bienvenidas. Por favor abre un _issue_ o envía un _pull request_.
 
 ---
 
 ## Licencia
-
-Este proyecto es parte de un ejercicio académico y se distribuye sin fines comerciales.
+Proyecto académico sin fines comerciales. Disponible bajo licencia MIT.

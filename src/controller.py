@@ -1,7 +1,10 @@
 """
 controller.py - Controlador para el sistema experto de diagnóstico médico
 Proyecto académico: Agente inteligente de diagnóstico de Infecciones Respiratorias Agudas
-Autor: Isaac
+Autores:
+Alan Isaac Pérez Hernández 336008878
+Molina García Luis Alberto 17715680
+Ethan David Ríos Beltrán 21257899
 Fecha: Julio 2025
 
 Descripción:

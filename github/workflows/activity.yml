@@ -1,0 +1,40 @@
+name: 📈 Activity Bot
+
+#  Define con qué frecuencia quieres commits:
+on:
+  # Cada hora a minuto 0:
+  schedule:
+    - cron: '0 12,16 * * *'   # a las 8 AM, 12 PM, 4 PM y 8 PM
+
+  # También corre cuando merges o pushes manuales para no perder el history
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write    # Permite al workflow hacer git commit & push
+
+jobs:
+  bump-activity:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 🚀 Checkout repo
+        uses: actions/checkout@v3
+        with:
+          persist-credentials: true  # para que use GITHUB_TOKEN al hacer push
+
+      - name: 📝 Actualizar archivo de actividad
+        run: |
+          # Asegúrate de usar un archivo que ya exista o crea uno:
+          echo "Última actividad: $(date --utc '+%Y-%m-%dT%H:%M:%SZ')" >> activity.log
+
+      - name: 🔧 Configurar autor de commit
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: ✅ Commit y push
+        run: |
+          git add activity.log
+          git commit -m "chore: actualización automática de activity.log [skip ci]" || echo "No hay cambios"
+          git push
